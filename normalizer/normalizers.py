@@ -21,4 +21,4 @@ class SumNormalizer(Normalizer):
     def normalize(self, x: np.ndarray) -> np.ndarray:
         col_sum = np.sum(x, axis=0)
         col_sum[col_sum == 0] = 1.0
-        return x / col_sum
+        return x / col_sum 
