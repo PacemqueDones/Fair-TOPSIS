@@ -58,9 +58,6 @@ class TOPSIS:
     def fit(self, x: np.ndarray, criteria: list[str], weights: np.ndarray | None = None):
         x = np.array(x, dtype=float)
 
-        if np.any(weights < 0):
-            raise ValueError("Os pesos devem ser não negativos.")
-
         if x.ndim != 2:
             raise ValueError("A matriz x deve ser bidimensional.")
 
@@ -68,9 +65,6 @@ class TOPSIS:
             raise ValueError(
                 "O número de critérios deve ser igual ao número de colunas da matriz."
             )
-        
-        if m <= 1:
-            raise ValueError("A matriz deve ter pelo menos duas alternativas para calcular entropia.")
 
         if weights is None:
             weights = self.entropy_weight(x)
@@ -82,27 +76,24 @@ class TOPSIS:
                     "O número de pesos deve ser igual ao número de colunas da matriz."
                 )
 
+            if np.any(weights < 0):
+                raise ValueError("Os pesos devem ser não negativos.")
+
             weight_sum = np.sum(weights)
             if weight_sum == 0:
                 raise ValueError("A soma dos pesos não pode ser zero.")
 
             weights = weights / weight_sum
 
-        # normalização do TOPSIS
         x_norm = self.normalizer.normalize(x)
-
-        # ponderação
         x_weighted = self.weight_matrix(x_norm, weights)
 
-        # ideais
         ideal_positive, ideal_negative = self.get_ideal_solutions(x_weighted, criteria)
 
-        # distâncias
         d_positive, d_negative = self.calculate_distances(
             x_weighted, ideal_positive, ideal_negative
         )
 
-        # scores
         scores = self.calculate_scores(d_positive, d_negative)
         ranking = np.argsort(scores)[::-1]
 
